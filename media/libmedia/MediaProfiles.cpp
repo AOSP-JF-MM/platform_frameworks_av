@@ -327,14 +327,17 @@ static bool isCameraIdFound(int cameraId, const Vector<int>& cameraIds) {
 /*static*/ MediaProfiles::CamcorderProfile*
 MediaProfiles::createCamcorderProfile(int cameraId, const char **atts, Vector<int>& cameraIds)
 {
-    CHECK(!strcmp("quality",    atts[0]) &&
+    /*CHECK(!strcmp("quality",    atts[0]) &&
           !strcmp("fileFormat", atts[2]) &&
+          !strcmp("duration",   atts[4]));*/
+
+    CHECK(!strcmp("fileFormat", atts[2]) &&
           !strcmp("duration",   atts[4]));
 
-    const size_t nProfileMappings = sizeof(sCamcorderQualityNameMap)/
+    /*const size_t nProfileMappings = sizeof(sCamcorderQualityNameMap)/
             sizeof(sCamcorderQualityNameMap[0]);
     const int quality = findTagForName(sCamcorderQualityNameMap, nProfileMappings, atts[1]);
-    CHECK(quality != -1);
+    CHECK(quality != -1);*/
 
     const size_t nFormatMappings = sizeof(sFileFormatMap)/sizeof(sFileFormatMap[0]);
     const int fileFormat = findTagForName(sFileFormatMap, nFormatMappings, atts[3]);
@@ -346,7 +349,7 @@ MediaProfiles::createCamcorderProfile(int cameraId, const char **atts, Vector<in
         cameraIds.add(cameraId);
     }
     profile->mFileFormat = static_cast<output_format>(fileFormat);
-    profile->mQuality = static_cast<camcorder_quality>(quality);
+    /*profile->mQuality = static_cast<camcorder_quality>(quality);*/
     profile->mDuration = atoi(atts[5]);
     return profile;
 }
