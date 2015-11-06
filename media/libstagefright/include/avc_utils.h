@@ -45,8 +45,7 @@ struct NALPosition {
 void FindAVCDimensions(
         const sp<ABuffer> &seqParamSet,
         int32_t *width, int32_t *height,
-        int32_t *sarWidth = NULL, int32_t *sarHeight = NULL,
-        int32_t *isInterlaced = NULL);
+        int32_t *sarWidth = NULL, int32_t *sarHeight = NULL);
 
 unsigned parseUE(ABitReader *br);
 
