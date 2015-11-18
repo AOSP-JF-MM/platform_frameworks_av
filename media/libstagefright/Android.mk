@@ -157,7 +157,7 @@ LOCAL_SHARED_LIBRARIES += \
 LOCAL_CFLAGS += -Wno-multichar -Werror -Wno-error=deprecated-declarations -Wall
 
 ifeq ($(TARGET_USES_QCOM_BSP), true)
-    LOCAL_C_INCLUDES += hardware/qcom/display/libgralloc
+    LOCAL_C_INCLUDES += $(call project-path-for,qcom-display)/libgralloc
     LOCAL_CFLAGS += -DQTI_BSP
 endif
 
@@ -168,6 +168,12 @@ endif
 
 ifeq ($(TARGET_BOARD_PLATFORM),omap4)
 LOCAL_CFLAGS += -DBOARD_CANT_REALLOCATE_OMX_BUFFERS
+endif
+
+ifeq ($(call is-vendor-board-platform,QCOM),true)
+ifeq ($(strip $(AUDIO_FEATURE_ENABLED_EXTN_FLAC_DECODER)),true)
+    LOCAL_CFLAGS += -DQTI_FLAC_DECODER
+endif
 endif
 
 LOCAL_CLANG := true
