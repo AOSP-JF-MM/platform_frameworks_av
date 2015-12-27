@@ -2932,13 +2932,11 @@ status_t ACodec::setupVideoDecoder(
     OMX_VIDEO_CODINGTYPE compressionFormat;
     status_t err = GetVideoCodingTypeFromMime(mime, &compressionFormat);
 
-    if (err != OK) {
-        err = FFMPEGSoftCodec::setVideoFormat(
+    err = FFMPEGSoftCodec::setVideoFormat(err,
                     msg, mime, mOMX, mNode, mIsEncoder, &compressionFormat,
                     mComponentName.c_str());
-        if (err != OK) {
-            return err;
-        }
+    if (err != OK) {
+        return err;
     }
 
     err = setVideoPortFormatType(
@@ -3087,14 +3085,12 @@ status_t ACodec::setupVideoEncoder(const char *mime, const sp<AMessage> &msg) {
     OMX_VIDEO_CODINGTYPE compressionFormat;
     err = GetVideoCodingTypeFromMime(mime, &compressionFormat);
 
-    if (err != OK) {
-        err = FFMPEGSoftCodec::setVideoFormat(
+    err = FFMPEGSoftCodec::setVideoFormat(err,
                 msg, mime, mOMX, mNode, mIsEncoder, &compressionFormat,
                 mComponentName.c_str());
-        if (err != OK) {
-            ALOGE("Not a supported video mime type: %s", mime);
-            return err;
-        }
+    if (err != OK) {
+        ALOGE("Not a supported video mime type: %s", mime);
+        return err;
     }
 
     err = setVideoPortFormatType(
