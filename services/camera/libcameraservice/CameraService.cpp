@@ -1521,8 +1521,11 @@ bool CameraService::evictClientIdByRemote(const wp<IBinder>& remote) {
     {
         // Acquire mServiceLock and prevent other clients from connecting
         std::unique_ptr<AutoConditionLock> lock =
-                AutoConditionLock::waitAndAcquire(mServiceLockWrapper);
+                AutoConditionLock::waitAndAcquire(mServiceLockWrapper,
+                        DEFAULT_DISCONNECT_TIMEOUT_NS);
 
+        if (lock == nullptr)
+            return ret;
 
         std::vector<sp<BasicClient>> evicted;
         for (auto& i : mActiveClientManager.getAll()) {
