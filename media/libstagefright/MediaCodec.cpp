@@ -297,7 +297,7 @@ void MediaCodec::PostReplyWithError(const sp<AReplyToken> &replyID, int32_t err)
 
     sp<AMessage> response = new AMessage;
     response->setInt32("err", finalErr);
-    notifyReplyID(response, replyID);
+    response->postReply(replyID);
 }
 
 status_t MediaCodec::init(const AString &name, bool nameIsType, bool encoder) {
@@ -639,7 +639,6 @@ status_t MediaCodec::reset() {
 
     // reset state not reset by setState(UNINITIALIZED)
     mReplyID = 0;
-    mReplyIDVector.clear();
     mDequeueInputReplyID = 0;
     mDequeueOutputReplyID = 0;
     mDequeueInputTimeoutGeneration = 0;
@@ -1094,7 +1093,7 @@ void MediaCodec::onMessageReceived(const sp<AMessage> &msg) {
                                 if (mState == RELEASING) {
                                     mComponentName.clear();
                                 }
-                                notifyReplyID(new AMessage);
+                                (new AMessage)->postReply(mReplyID);
                             }
                             break;
                         }
@@ -1199,7 +1198,7 @@ void MediaCodec::onMessageReceived(const sp<AMessage> &msg) {
                         addResource(resourceType, String8(kResourceVideoCodec), 1);
                     }
 
-                    notifyReplyID(new AMessage);
+                    (new AMessage)->postReply(mReplyID);
                     break;
                 }
 
@@ -1226,7 +1225,7 @@ void MediaCodec::onMessageReceived(const sp<AMessage> &msg) {
                         mFlags |= kFlagUsesSoftwareRenderer;
                     }
                     setState(CONFIGURED);
-                    notifyReplyID(new AMessage);
+                    (new AMessage)->postReply(mReplyID);
                     break;
                 }
 
@@ -1244,7 +1243,7 @@ void MediaCodec::onMessageReceived(const sp<AMessage> &msg) {
                     } else {
                         response->setInt32("err", err);
                     }
-                    notifyReplyID(response);
+                    response->postReply(mReplyID);
                     break;
                 }
 
@@ -1258,7 +1257,7 @@ void MediaCodec::onMessageReceived(const sp<AMessage> &msg) {
                     } else {
                         response->setInt32("err", err);
                     }
-                    notifyReplyID(response);
+                    response->postReply(mReplyID);
                     break;
                 }
 
@@ -1270,7 +1269,7 @@ void MediaCodec::onMessageReceived(const sp<AMessage> &msg) {
                     if (msg->findInt32("err", &err)) {
                         response->setInt32("err", err);
                     }
-                    notifyReplyID(response);
+                    response->postReply(mReplyID);
                     break;
                 }
 
@@ -1339,7 +1338,7 @@ void MediaCodec::onMessageReceived(const sp<AMessage> &msg) {
                                         getGraphicBufferSize());
                             }
                             setState(STARTED);
-                            notifyReplyID(new AMessage());
+                            (new AMessage)->postReply(mReplyID);
                         } else {
                             mFlags |= kFlagOutputBuffersChanged;
                             postActivityNotificationIfPossible();
@@ -1535,7 +1534,7 @@ void MediaCodec::onMessageReceived(const sp<AMessage> &msg) {
 
                     mResourceManagerService->removeResource(getId(mResourceManagerClient));
 
-                    notifyReplyID(new AMessage());
+                    (new AMessage)->postReply(mReplyID);
                     break;
                 }
 
@@ -1554,7 +1553,7 @@ void MediaCodec::onMessageReceived(const sp<AMessage> &msg) {
                         mCodec->signalResume();
                     }
 
-                    notifyReplyID(new AMessage());
+                    (new AMessage)->postReply(mReplyID);
                     break;
                 }
 
@@ -1820,12 +1819,6 @@ void MediaCodec::onMessageReceived(const sp<AMessage> &msg) {
                 sp<AMessage> response = new AMessage;
                 response->setInt32("err", OK);
                 response->postReply(replyID);
-                break;
-            }
-
-            if (mState == RELEASING) {
-                // release/reclaim already pending, just store the reply id
-                putReplyID(replyID, true);
                 break;
             }
 
@@ -2836,33 +2829,6 @@ void MediaCodec::updateBatteryStat() {
         }
 
         mBatteryStatNotified = false;
-    }
-}
-
-void MediaCodec::putReplyID(sp<AReplyToken>& reply, bool add) {
-    if (mReplyID == 0 || !add) {
-        mReplyID = reply;
-    } else {
-        mReplyIDVector.push_back(reply);
-        ALOGD("Additional reply stored: reply=%p", reply.get());
-    }
-}
-
-void MediaCodec::notifyReplyID(sp<AMessage> msg) {
-    notifyReplyID(msg, mReplyID);
-}
-
-void MediaCodec::notifyReplyID(sp<AMessage> msg, const sp<AReplyToken>& replyID) {
-    if (replyID == mReplyID) {
-        for (size_t i = 0 ; i < mReplyIDVector.size() ; i++) {
-            msg->dup()->postReply(mReplyIDVector[i]);
-            ALOGD("Additional reply notified: reply=%p", replyID.get());
-        }
-        mReplyIDVector.clear();
-        msg->postReply(mReplyID);
-        mReplyID = 0;
-    } else {
-        msg->postReply(replyID);
     }
 }
 
