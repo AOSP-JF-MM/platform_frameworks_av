@@ -222,7 +222,7 @@ static_vo Word16 shl (Word16 var1, Word16 var2)
     }
     else
     {
-        result = (Word32) var1 *((Word32) 1 << var2);
+        result = L_add(var1, ((Word32) 1 << var2));
         if ((var2 > 15 && var1 != 0) || (result != (Word32) ((Word16) result)))
         {
             var_out = (Word16)((var1 > 0) ? MAX_16 : MIN_16);
@@ -388,7 +388,7 @@ static_vo Word32 L_mult (Word16 var1, Word16 var2)
     L_var_out = (Word32) var1 *(Word32) var2;
     if (L_var_out != (Word32) 0x40000000L)
     {
-        L_var_out *= 2;
+        L_var_out = L_shl(L_var_out, 1);
     }
     else
     {
@@ -478,7 +478,7 @@ static_vo Word32 L_mac (Word32 L_var3, Word16 var1, Word16 var2)
 {
     Word32 L_var_out;
     Word32 L_product;
-    L_product = ((var1 * var2) << 1);
+    L_product = L_mult(var1, var2);
     L_var_out = L_add (L_var3, L_product);
     return (L_var_out);
 }

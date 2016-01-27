@@ -55,7 +55,7 @@ void cor_h_x(
         p1 = &x[i];
         p2 = &h[0];
         for (j = i; j < L_SUBFR; j++)
-            L_tmp += vo_L_mult(*p1++, *p2++);
+            L_tmp = L_add(L_tmp, vo_L_mult(*p1++, *p2++));
 
         y32[i] = L_tmp;
         L_tmp = (L_tmp > 0)? L_tmp:-L_tmp;
@@ -68,7 +68,7 @@ void cor_h_x(
         p1 = &x[i+1];
         p2 = &h[0];
         for (j = i+1; j < L_SUBFR; j++)
-            L_tmp += vo_L_mult(*p1++, *p2++);
+            L_tmp = L_add(L_tmp, vo_L_mult(*p1++, *p2++));
 
         y32[i+1] = L_tmp;
         L_tmp = (L_tmp > 0)? L_tmp:-L_tmp;
@@ -81,10 +81,10 @@ void cor_h_x(
         p1 = &x[i+2];
         p2 = &h[0];
         for (j = i+2; j < L_SUBFR; j++)
-            L_tmp += vo_L_mult(*p1++, *p2++);
+            L_tmp = L_add(L_tmp, vo_L_mult(*p1++, *p2++));
 
         y32[i+2] = L_tmp;
-        L_tmp = (L_tmp > 0)? L_tmp:-L_tmp;
+        L_tmp = (L_tmp > 0)? L_tmp: (L_tmp == INT_MIN ? INT_MAX : -L_tmp);
         if(L_tmp > L_max2)
         {
             L_max2 = L_tmp;
@@ -94,7 +94,7 @@ void cor_h_x(
         p1 = &x[i+3];
         p2 = &h[0];
         for (j = i+3; j < L_SUBFR; j++)
-            L_tmp += vo_L_mult(*p1++, *p2++);
+            L_tmp = L_add(L_tmp, vo_L_mult(*p1++, *p2++));
 
         y32[i+3] = L_tmp;
         L_tmp = (L_tmp > 0)? L_tmp:-L_tmp;
@@ -104,7 +104,13 @@ void cor_h_x(
         }
     }
     /* tot += 3*max / 8 */
-    L_max = ((L_max + L_max1 + L_max2 + L_max3) >> 2);
+    if (L_max > INT_MAX - L_max1 ||
+            L_max + L_max1 > INT_MAX - L_max2 ||
+            L_max + L_max1 + L_max2 > INT_MAX - L_max3) {
+        L_max = INT_MAX >> 2;
+    } else {
+        L_max = ((L_max + L_max1 + L_max2 + L_max3) >> 2);
+    }
     L_tot = vo_L_add(L_tot, L_max);       /* +max/4 */
     L_tot = vo_L_add(L_tot, (L_max >> 1));  /* +max/8 */
 
