@@ -8,7 +8,7 @@ LOCAL_PATH:= $(call my-dir)
 include $(CLEAR_VARS)
 
 LOCAL_MODULE := libcommon_time_client
-LOCAL_MODULE_TAGS := optional
+LOCAL_CFLAGS := -Wno-unused-parameter
 LOCAL_SRC_FILES := cc_helper.cpp \
                    local_clock.cpp \
                    ICommonClock.cpp \
