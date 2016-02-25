@@ -367,7 +367,7 @@ void CameraService::onTorchStatusChangedLocked(const String8& cameraId,
 
     res = setTorchStatusLocked(cameraId, newStatus);
     if (res) {
-        ALOGE("%s: Failed to set the torch status", __FUNCTION__, (uint32_t)newStatus);
+        ALOGE("%s: Failed to set the torch status to %d", __FUNCTION__, (uint32_t)newStatus);
         return;
     }
 
@@ -484,7 +484,6 @@ status_t CameraService::generateShimMetadata(int cameraId, /*out*/CameraMetadata
     Vector<Size> sizes;
     Vector<Size> jpegSizes;
     Vector<int32_t> formats;
-    const char* supportedPreviewFormats;
     {
         shimParams.getSupportedPreviewSizes(/*out*/sizes);
         shimParams.getSupportedPreviewFormats(/*out*/formats);
@@ -1320,7 +1319,6 @@ status_t CameraService::setTorchMode(const String16& cameraId, bool enabled,
         // update the link to client's death
         Mutex::Autolock al(mTorchClientMapMutex);
         ssize_t index = mTorchClientMap.indexOfKey(id);
-        BatteryNotifier& notifier(BatteryNotifier::getInstance());
         if (enabled) {
             if (index == NAME_NOT_FOUND) {
                 mTorchClientMap.add(id, clientBinder);
