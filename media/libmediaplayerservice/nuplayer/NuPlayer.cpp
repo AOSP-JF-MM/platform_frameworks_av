@@ -1154,6 +1154,7 @@ void NuPlayer::onMessageReceived(const sp<AMessage> &msg) {
                     mRenderer->flush(
                             false /* audio */, false /* notifyComplete */);
                 }
+                mRenderer->signalAudioTearDownComplete();
 
                 int64_t positionUs;
                 if (!msg->findInt64("positionUs", &positionUs)) {
