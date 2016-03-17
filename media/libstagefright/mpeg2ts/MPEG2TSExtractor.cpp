@@ -112,7 +112,8 @@ status_t MPEG2TSSource::read(
 MPEG2TSExtractor::MPEG2TSExtractor(const sp<DataSource> &source)
     : mDataSource(source),
       mParser(new ATSParser),
-      mOffset(0) {
+      mOffset(0),
+      mDurationUs(-1) {
     init();
 }
 
@@ -238,6 +239,7 @@ void MPEG2TSExtractor::init() {
             const sp<MetaData> meta = impl->getFormat();
             meta->setInt64(kKeyDuration, durationUs);
             impl->setFormat(meta);
+            mDurationUs = durationUs;
         }
     }
 
@@ -285,7 +287,12 @@ status_t MPEG2TSExtractor::feedMore() {
 }
 
 uint32_t MPEG2TSExtractor::flags() const {
-    return CAN_PAUSE | CAN_SEEK_BACKWARD | CAN_SEEK_FORWARD;
+    uint32_t flags = CAN_PAUSE;
+
+    if (mDurationUs > 0)
+        flags |= CAN_SEEK_BACKWARD | CAN_SEEK_FORWARD;
+
+    return flags;
 }
 
 status_t MPEG2TSExtractor::seek(int64_t seekTimeUs,

@@ -62,6 +62,7 @@ private:
     KeyedVector<int64_t, off64_t> *mSeekSyncPoints;
 
     off64_t mOffset;
+    int64_t mDurationUs;
 
     void init();
     status_t feedMore();
