@@ -6606,6 +6606,9 @@ bool ACodec::ExecutingState::onOMXEvent(
                     sp<AMessage> dummy = new AMessage(kWhatOutputBufferDrained, mCodec);
                     mCodec->sendFormatChange(dummy);
                 }
+            } else if (data2 == OMX_IndexParamAudioPcm) {
+                //audio parameters has changed
+                mCodec->mSentFormat = false;
             } else {
                 ALOGV("[%s] OMX_EventPortSettingsChanged 0x%08x",
                      mCodec->mComponentName.c_str(), data2);
