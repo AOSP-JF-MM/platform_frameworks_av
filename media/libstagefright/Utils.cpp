@@ -603,6 +603,11 @@ void convertMessageToMetaData(const sp<AMessage> &msg, sp<MetaData> &meta) {
         meta->setInt32(kKeyIsSyncFrame, 1);
     }
 
+    int bitrate;
+    if (msg->findInt32("bit-rate", &bitrate)) {
+        meta->setInt32(kKeyBitRate, bitrate);
+    }
+
     if (mime.startsWith("video/")) {
         int32_t width;
         int32_t height;
