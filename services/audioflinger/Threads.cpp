@@ -206,11 +206,6 @@ static const int kFastTrackMultiplierMax = 2;
 // The actual value to use, which can be specified per-device via property af.fast_track_multiplier.
 static int sFastTrackMultiplier = kFastTrackMultiplier;
 
-// By default monopipe depth is kept as normalFramecount x 2 when display is on and full monopipe is
-// used when display is off. Set kUseFixedMonoPipeDepth to 1 to avoid this logic and always use
-// full monopipe depth.
-static int kUseFixedMonoPipeDepth = 0;
-
 // See Thread::readOnlyHeap().
 // Initially this heap is used to allocate client buffers for "fast" AudioRecord.
 // Eventually it will be the single buffer that FastCapture writes into via HAL read(),
@@ -2466,7 +2461,7 @@ ssize_t AudioFlinger::PlaybackThread::threadLoop_write()
             mScreenState = screenState;
             MonoPipe *pipe = (MonoPipe *)mPipeSink.get();
             if (pipe != NULL) {
-                pipe->setAvgFrames(((mScreenState | kUseFixedMonoPipeDepth) & 1) ?
+                pipe->setAvgFrames((mScreenState & 1) ?
                         (pipe->maxFrames() * 7) / 8 : mNormalFrameCount * 2);
             }
         }
@@ -3417,7 +3412,7 @@ AudioFlinger::MixerThread::MixerThread(const sp<AudioFlinger>& audioFlinger, Aud
         size_t numCounterOffers = 0;
         ssize_t index = monoPipe->negotiate(offers, 1, NULL, numCounterOffers);
         ALOG_ASSERT(index == 0);
-        monoPipe->setAvgFrames(((mScreenState | kUseFixedMonoPipeDepth) & 1) ?
+        monoPipe->setAvgFrames((mScreenState & 1) ?
                 (monoPipe->maxFrames() * 7) / 8 : mNormalFrameCount * 2);
         mPipeSink = monoPipe;
 
