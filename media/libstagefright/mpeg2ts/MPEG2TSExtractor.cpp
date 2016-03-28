@@ -297,7 +297,15 @@ uint32_t MPEG2TSExtractor::flags() const {
 
 status_t MPEG2TSExtractor::seek(int64_t seekTimeUs,
         const MediaSource::ReadOptions::SeekMode &seekMode) {
-    if (mSeekSyncPoints == NULL || mSeekSyncPoints->isEmpty()) {
+    if (seekTimeUs == 0) {
+        // For streams without sync points, seek to zero should work
+        mOffset = 0;
+        status_t err = queueDiscontinuityForSeek(seekTimeUs);
+        if (err != OK) {
+            return err;
+        }
+        return OK;
+    } else if (mSeekSyncPoints == NULL || mSeekSyncPoints->isEmpty()) {
         ALOGW("No sync point to seek to.");
         // ... and therefore we have nothing useful to do here.
         return OK;
