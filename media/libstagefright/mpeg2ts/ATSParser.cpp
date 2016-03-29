@@ -1454,8 +1454,10 @@ status_t ATSParser::parseTS(ABitReader *br, SyncEvent *event) {
 
     unsigned sync_byte = br->getBits(8);
     if (sync_byte != 0x47u) {
-        ALOGE("[error] parseTS: return error as sync_byte=0x%x", sync_byte);
-        return BAD_VALUE;
+        ALOGE("Erroneous TS packet, skipping!");
+        ALOGV("sync_byte is 0x%2x instead of expected 0x47", sync_byte);
+        br->skipBits(br->numBitsLeft());
+        return OK;
     }
 
     if (br->getBits(1)) {  // transport_error_indicator
