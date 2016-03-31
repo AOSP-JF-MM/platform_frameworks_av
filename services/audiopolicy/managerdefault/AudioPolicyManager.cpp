@@ -876,10 +876,6 @@ audio_io_handle_t AudioPolicyManager::getOutputForDevice(
         }
         // close direct output if currently open and configured with different parameters
         if (outputDesc != NULL) {
-            if ((flags & AUDIO_OUTPUT_FLAG_IEC958_NONAUDIO) && (outputDesc->mRefCount[stream])) {
-                ALOGW("IEC958 stream with format %#x is already playing", outputDesc->mFormat);
-                goto non_direct_output;
-            }
             closeOutput(outputDesc->mIoHandle);
         }
 
