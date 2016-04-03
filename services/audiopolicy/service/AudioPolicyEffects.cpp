@@ -244,8 +244,6 @@ status_t AudioPolicyEffects::addOutputSessionEffects(audio_io_handle_t output,
     if (idx < 0) {
         procDesc = new EffectVector(audioSession);
         mOutputSessions.add(audioSession, procDesc);
-
-        mAudioPolicyService->onOutputSessionEffectsUpdate(stream, audioSession, true);
     } else {
         // EffectVector is existing and we just need to increase ref count
         procDesc = mOutputSessions.valueAt(idx);
@@ -273,6 +271,7 @@ status_t AudioPolicyEffects::addOutputSessionEffects(audio_io_handle_t output,
         }
 
         procDesc->setProcessorEnabled(true);
+        return 1;
     }
     return status;
 }
