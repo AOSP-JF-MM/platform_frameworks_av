@@ -116,6 +116,10 @@ struct ATSParser : public RefBase {
 
     bool PTSTimeDeltaEstablished();
 
+    void SetTsPacketLength(ssize_t len);
+
+    ssize_t GetTsPacketLength(void);
+
     enum {
         // From ISO/IEC 13818-1: 2000 (E), Table 2-29
         STREAMTYPE_RESERVED             = 0x00,
@@ -143,6 +147,7 @@ private:
     struct Program;
     struct Stream;
     struct PSISection;
+    ssize_t tsPacketLen;
 
     uint32_t mFlags;
     Vector<sp<Program> > mPrograms;

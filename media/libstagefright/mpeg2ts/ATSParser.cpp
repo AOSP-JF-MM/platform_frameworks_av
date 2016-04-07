@@ -1159,19 +1159,32 @@ ATSParser::ATSParser(uint32_t flags)
       mNumTSPacketsParsed(0),
       mNumPCRs(0) {
     mPSISections.add(0 /* PID */, new PSISection);
+    tsPacketLen = kTSPacketSize;
 }
 
 ATSParser::~ATSParser() {
 }
 
+void ATSParser::SetTsPacketLength(ssize_t len) {
+    tsPacketLen = len;
+}
+
+ssize_t ATSParser::GetTsPacketLength() {
+    return tsPacketLen;
+}
+
 status_t ATSParser::feedTSPacket(const void *data, size_t size,
         SyncEvent *event) {
-    if (size != kTSPacketSize) {
+    if (size != (size_t)GetTsPacketLength()) {
         ALOGE("Wrong TS packet size");
         return BAD_VALUE;
     }
 
-    ABitReader br((const uint8_t *)data, kTSPacketSize);
+    ABitReader br((const uint8_t *)data, GetTsPacketLength());
+    if (GetTsPacketLength() == 192) {
+        ALOGV("Blue Ray/M2TS content");
+        br.skipBits(32);
+    }
     return parseTS(&br, event);
 }
 
