@@ -32,9 +32,9 @@ class MediaBuffer;
 
 struct NuPlayer::Source : public AHandler {
     enum Flags {
-        FLAG_CAN_PAUSE          = 1,
-        FLAG_CAN_SEEK_BACKWARD  = 2,  // the "10 sec back button"
-        FLAG_CAN_SEEK_FORWARD   = 4,  // the "10 sec forward button"
+        FLAG_CAN_SEEK_BACKWARD  = 1,  // the "10 sec back button"
+        FLAG_CAN_SEEK_FORWARD   = 2,  // the "10 sec forward button"
+        FLAG_CAN_PAUSE          = 4,
         FLAG_CAN_SEEK           = 8,  // the "seek bar"
         FLAG_DYNAMIC_DURATION   = 16,
         FLAG_SECURE             = 32,
