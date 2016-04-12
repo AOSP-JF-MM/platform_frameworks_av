@@ -16,6 +16,8 @@ LOCAL_C_INCLUDES:= \
 LOCAL_CFLAGS += -Werror -Wall
 LOCAL_CLANG := true
 
+LOCAL_SHARED_LIBRARIES := libmedia
+
 LOCAL_MODULE:= libstagefright_mpeg2ts
 
 ifeq ($(TARGET_ARCH),arm)

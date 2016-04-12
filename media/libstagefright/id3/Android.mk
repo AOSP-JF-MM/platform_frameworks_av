@@ -7,6 +7,8 @@ LOCAL_SRC_FILES := \
 LOCAL_CFLAGS += -Werror -Wall
 LOCAL_CLANG := true
 
+LOCAL_SHARED_LIBRARIES := libmedia
+
 LOCAL_MODULE := libstagefright_id3
 
 include $(BUILD_STATIC_LIBRARY)

@@ -154,6 +154,8 @@ LOCAL_SHARED_LIBRARIES += \
         libdl \
         libRScpp \
 
+LOCAL_EXPORT_SHARED_LIBRARY_HEADERS := libmedia
+
 LOCAL_CFLAGS += -Werror -Wno-multichar -Wno-error=deprecated-declarations
 
 ifeq ($(TARGET_USES_QCOM_BSP), true)
