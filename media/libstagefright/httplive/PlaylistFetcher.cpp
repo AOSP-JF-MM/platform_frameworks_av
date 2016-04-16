@@ -703,8 +703,6 @@ status_t PlaylistFetcher::onStart(const sp<AMessage> &msg) {
         mSeqNumber = -1;
         mTimeChangeSignaled = false;
         mDownloadState->resetState();
-        if (mTSParser != NULL)
-            mTSParser.clear();
     }
 
     postMonitorQueue();

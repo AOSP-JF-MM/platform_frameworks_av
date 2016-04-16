@@ -45,8 +45,6 @@ struct MPEG2TSExtractor : public MediaExtractor {
 
     virtual uint32_t flags() const;
 
-    bool IsM2TSMedia(void);
-
 private:
     friend struct MPEG2TSSource;
 
@@ -64,8 +62,6 @@ private:
     KeyedVector<int64_t, off64_t> *mSeekSyncPoints;
 
     off64_t mOffset;
-    int64_t mDurationUs;
-    bool isM2TSMedia;
 
     void init();
     status_t feedMore();

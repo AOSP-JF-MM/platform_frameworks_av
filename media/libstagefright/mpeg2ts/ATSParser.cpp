@@ -1159,32 +1159,19 @@ ATSParser::ATSParser(uint32_t flags)
       mNumTSPacketsParsed(0),
       mNumPCRs(0) {
     mPSISections.add(0 /* PID */, new PSISection);
-    tsPacketLen = kTSPacketSize;
 }
 
 ATSParser::~ATSParser() {
 }
 
-void ATSParser::SetTsPacketLength(ssize_t len) {
-    tsPacketLen = len;
-}
-
-ssize_t ATSParser::GetTsPacketLength() {
-    return tsPacketLen;
-}
-
 status_t ATSParser::feedTSPacket(const void *data, size_t size,
         SyncEvent *event) {
-    if (size != (size_t)GetTsPacketLength()) {
+    if (size != kTSPacketSize) {
         ALOGE("Wrong TS packet size");
         return BAD_VALUE;
     }
 
-    ABitReader br((const uint8_t *)data, GetTsPacketLength());
-    if (GetTsPacketLength() == 192) {
-        ALOGV("Blue Ray/M2TS content");
-        br.skipBits(32);
-    }
+    ABitReader br((const uint8_t *)data, kTSPacketSize);
     return parseTS(&br, event);
 }
 
@@ -1467,10 +1454,8 @@ status_t ATSParser::parseTS(ABitReader *br, SyncEvent *event) {
 
     unsigned sync_byte = br->getBits(8);
     if (sync_byte != 0x47u) {
-        ALOGE("Erroneous TS packet, skipping!");
-        ALOGV("sync_byte is 0x%2x instead of expected 0x47", sync_byte);
-        br->skipBits(br->numBitsLeft());
-        return OK;
+        ALOGE("[error] parseTS: return error as sync_byte=0x%x", sync_byte);
+        return BAD_VALUE;
     }
 
     if (br->getBits(1)) {  // transport_error_indicator
