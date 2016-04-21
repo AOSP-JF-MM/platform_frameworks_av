@@ -83,6 +83,8 @@ LOCAL_SHARED_LIBRARIES := \
         libcamera_client libstagefright_foundation \
         libgui libdl libaudioutils libnbaio
 
+LOCAL_EXPORT_SHARED_LIBRARY_HEADERS := libbinder
+
 LOCAL_WHOLE_STATIC_LIBRARIES := libmedia_helper libavmediaextentions
 
 LOCAL_MODULE:= libmedia

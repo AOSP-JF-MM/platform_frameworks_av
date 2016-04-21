@@ -39,7 +39,6 @@
 
 namespace android {
 
-static const size_t kMaxTSPacketSize = 192;
 static const size_t kTSPacketSize = 188;
 
 struct MPEG2TSSource : public MediaSource {
@@ -113,9 +112,7 @@ status_t MPEG2TSSource::read(
 MPEG2TSExtractor::MPEG2TSExtractor(const sp<DataSource> &source)
     : mDataSource(source),
       mParser(new ATSParser),
-      mOffset(0),
-      mDurationUs(-1),
-      isM2TSMedia(false) {
+      mOffset(0) {
     init();
 }
 
@@ -151,27 +148,6 @@ void MPEG2TSExtractor::init() {
     bool haveAudio = false;
     bool haveVideo = false;
     int64_t startTime = ALooper::GetNowUs();
-
-    if ((mParser->GetTsPacketLength() != kTSPacketSize ||  mParser->GetTsPacketLength() != kMaxTSPacketSize))
-    {
-        ALOGV("Setting the TS Packet Size");
-        mParser->SetTsPacketLength(kTSPacketSize);
-        char header[5];
-        if (mDataSource->readAt( 0,  header, 5) == 5)
-        //Check if it is m2ts or normal ts
-        {
-             if (*header == 0x47)
-             {
-                 mParser->SetTsPacketLength(kTSPacketSize);
-             }
-             else if (*(header + 4) == 0x47)
-             {
-                 mParser->SetTsPacketLength(kMaxTSPacketSize);
-                 isM2TSMedia = true;
-             }
-        }
-        ALOGV("Set the TS packet size as %zd", mParser->GetTsPacketLength());
-    }
 
     while (feedMore() == OK) {
         if (haveAudio && haveVideo) {
@@ -262,7 +238,6 @@ void MPEG2TSExtractor::init() {
             const sp<MetaData> meta = impl->getFormat();
             meta->setInt64(kKeyDuration, durationUs);
             impl->setFormat(meta);
-            mDurationUs = durationUs;
         }
     }
 
@@ -273,10 +248,10 @@ void MPEG2TSExtractor::init() {
 status_t MPEG2TSExtractor::feedMore() {
     Mutex::Autolock autoLock(mLock);
 
-    uint8_t packet[kMaxTSPacketSize];
-    ssize_t n = mDataSource->readAt(mOffset, packet, mParser->GetTsPacketLength());
+    uint8_t packet[kTSPacketSize];
+    ssize_t n = mDataSource->readAt(mOffset, packet, kTSPacketSize);
 
-    if (n < (ssize_t)mParser->GetTsPacketLength()) {
+    if (n < (ssize_t)kTSPacketSize) {
         if (n >= 0) {
             mParser->signalEOS(ERROR_END_OF_STREAM);
         }
@@ -285,7 +260,7 @@ status_t MPEG2TSExtractor::feedMore() {
 
     ATSParser::SyncEvent event(mOffset);
     mOffset += n;
-    status_t err = mParser->feedTSPacket(packet, mParser->GetTsPacketLength(), &event);
+    status_t err = mParser->feedTSPacket(packet, kTSPacketSize, &event);
     if (event.isInit()) {
         for (size_t i = 0; i < mSourceImpls.size(); ++i) {
             if (mSourceImpls[i].get() == event.getMediaSource().get()) {
@@ -310,29 +285,12 @@ status_t MPEG2TSExtractor::feedMore() {
 }
 
 uint32_t MPEG2TSExtractor::flags() const {
-    uint32_t flags = CAN_PAUSE;
-
-    if (mDurationUs > 0)
-        flags |= CAN_SEEK_BACKWARD | CAN_SEEK_FORWARD;
-
-    return flags;
-}
-
-bool MPEG2TSExtractor::IsM2TSMedia() {
-    return (isM2TSMedia);
+    return CAN_PAUSE | CAN_SEEK_BACKWARD | CAN_SEEK_FORWARD;
 }
 
 status_t MPEG2TSExtractor::seek(int64_t seekTimeUs,
         const MediaSource::ReadOptions::SeekMode &seekMode) {
-    if (seekTimeUs == 0) {
-        // For streams without sync points, seek to zero should work
-        mOffset = 0;
-        status_t err = queueDiscontinuityForSeek(seekTimeUs);
-        if (err != OK) {
-            return err;
-        }
-        return OK;
-    } else if (mSeekSyncPoints == NULL || mSeekSyncPoints->isEmpty()) {
+    if (mSeekSyncPoints == NULL || mSeekSyncPoints->isEmpty()) {
         ALOGW("No sync point to seek to.");
         // ... and therefore we have nothing useful to do here.
         return OK;
@@ -507,34 +465,18 @@ status_t MPEG2TSExtractor::feedUntilBufferAvailable(
 bool SniffMPEG2TS(
         const sp<DataSource> &source, String8 *mimeType, float *confidence,
         sp<AMessage> *) {
-    bool success = false;
-    size_t tspacketlen = kTSPacketSize;
     for (int i = 0; i < 5; ++i) {
-        char header[5];
-        //Check if it is m2ts or normal ts
-        if (source->readAt(tspacketlen * i, header, 5) == 5) {
-            if(*header == 0x47) {
-                 ALOGV("Normal TS content keeping kTSPacketSize as %zu", tspacketlen);
-                 success = true;
-            } else if(*(header + 4) == 0x47) {
-                 tspacketlen = kMaxTSPacketSize;
-                 ALOGV("M2TS Blųe Ray Content keeping kTSPacketSize as %zu", tspacketlen);
-                 success = true;
-            } else {
-                ALOGV("Unrecognised TS Content");
-                return success;
-            }
-        } else {
-            ALOGV("Unrecognised TS Content");
-            return success;
-
+        char header;
+        if (source->readAt(kTSPacketSize * i, &header, 1) != 1
+                || header != 0x47) {
+            return false;
         }
     }
 
     *confidence = 0.1f;
     mimeType->setTo(MEDIA_MIMETYPE_CONTAINER_MPEG2TS);
 
-    return success;
+    return true;
 }
 
 }  // namespace android
