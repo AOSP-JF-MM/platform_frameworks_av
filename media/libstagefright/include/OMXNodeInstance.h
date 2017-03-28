@@ -164,7 +164,7 @@ private:
     // For debug support
     char *mName;
     int DEBUG;
-    size_t mNumPortBuffers[2];  // modified under mLock, read outside for debug
+    size_t mNumPortBuffers[4];  // modified under mLock, read outside for debug
     Mutex mDebugLock;
     // following are modified and read under mDebugLock
     int DEBUG_BUMP;
