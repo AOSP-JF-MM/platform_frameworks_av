@@ -106,7 +106,8 @@ AudioFlinger::EffectModule::EffectModule(ThreadBase *thread,
         goto Error;
     }
 
-    setOffloaded(thread->type() == ThreadBase::OFFLOAD, thread->id());
+    setOffloaded((thread->type() == ThreadBase::OFFLOAD ||
+                 (thread->type() == ThreadBase::DIRECT && thread->mIsDirectPcm)), thread->id());
 
     ALOGV("Constructor success name %s, Interface %p", mDescriptor.name, mEffectInterface);
     return;
@@ -1824,7 +1825,6 @@ size_t AudioFlinger::EffectChain::removeEffect_l(const sp<EffectModule>& effect,
                 effect->setSuspended(false);
             }
 #endif // DOLBY_END
-
             break;
         }
     }
