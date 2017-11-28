@@ -144,7 +144,7 @@ private:
     bool mLegacyAdaptiveExperiment;
     IOMX::PortMode mPortMode[2];
     // metadata and secure buffer types and graphic buffer mode tracking
-    MetadataBufferType mMetadataType[2];
+    MetadataBufferType mMetadataType[4];
     enum SecureBufferType {
         kSecureBufferTypeUnknown,
         kSecureBufferTypeOpaque,
